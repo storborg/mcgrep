@@ -35,12 +35,12 @@ class ExtendedClient(memcache.Client):
         return data
 
 
-class Leacher(object):
+class Leecher(object):
 
     def __init__(self, mc):
         self.mc = mc
 
-    def leach(self, slabs_to_retrieve=None, key_limit=0, key_regex=None):
+    def leech(self, slabs_to_retrieve=None, key_limit=0, key_regex=None):
         if slabs_to_retrieve:
             # just retrieve these slab IDs
             slabs_to_retrieve = set(slabs_to_retrieve)
@@ -68,26 +68,48 @@ def main(argv=None):
     opt = OptionParser(usage="usage: %prog [options] [PATTERN]",
                        version="%%prog %s" % __version__)
     opt.add_option('-s', '--server', dest='servers',
-                   help="connect to server", action='append',
-                   type='string')
+                   help="connect to server. defaults to localhost",
+                   action='append', type='string')
     opt.add_option('-K', '--key-limit', dest='key_limit',
                    help="number of keys to pull per slab",
                    action='store', type='int', default=0)
+    opt.add_option('-m', '--match-keys', dest='key_regex',
+                   help="match keys against this regex",
+                   action='store', type='string')
+    opt.add_option('-V', '--values', dest='print_values',
+                   help="print full values of keys",
+                   action='store_true', default=False)
 
     if argv is None:
         argv = sys.argv[1:]
     options, args = opt.parse_args(argv)
 
-    if len(args) > 0:
-        key_regex = re.compile(args[0])
+    if not options.servers:
+        servers = ['localhost:11211']
+    else:
+        servers = options.servers
+    leecher = Leecher(ExtendedClient(servers))
+
+    if options.key_regex:
+        key_regex = re.compile(options.key_regex)
     else:
         key_regex = None
 
-    leacher = Leacher(ExtendedClient(options.servers))
-    for key, val in leacher.leach(key_limit=options.key_limit,
+    if len(args) > 0:
+        all_regex = re.compile(args[0])
+    else:
+        all_regex = None
+
+    for key, val in leecher.leech(key_limit=options.key_limit,
                                   key_regex=key_regex):
-        print key
-        #print "%s:%s" % (key, val)
+        val = repr(val)
+        if all_regex and (not (all_regex.search(val) or
+                               all_regex.search(key))):
+            continue
+        if options.print_values:
+            print "%s:%s" % (key, val)
+        else:
+            print key
 
 
 if __name__ == '__main__':
