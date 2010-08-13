@@ -6,9 +6,12 @@ mcgrep - Grep through memcached servers
     Scott Torborg (storborg)
 :Version: 0.1
 
-A simple tool to grep through memcached.
+A simple tool to grep through memcached. Uses the poorly-documented features outlined in the the 2010 Black Hat presentation by SensePost:
+
+http://www.sensepost.com/blog/4873.html
 
 *Note* Use at your own risk!
+
 
 Installation
 ============
