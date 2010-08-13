@@ -12,25 +12,26 @@ class ExtendedClient(memcache.Client):
     def get_keys(self, slab_id, key_limit):
         data = []
         for s in self.servers:
-            if not s.connect(): continue
+            if not s.connect():
+                continue
             if s.family == socket.AF_INET:
                 name = '%s:%s (%s)' % ( s.ip, s.port, s.weight )
             else:
                 name = 'unix:%s (%s)' % ( s.address, s.weight )
-            serverData = {}
-            data.append((name, serverData))
+            sdata = {}
+            data.append((name, sdata))
             s.send_cmd('stats cachedump %d %d' % (slab_id, key_limit))
-            readline = s.readline
             while 1:
-                line = readline()
-                if not line or line.strip() == 'END': break
+                line = s.readline()
+                if not line or line.strip() == 'END':
+                    break
                 m = re.match('^ITEM (?P<key>\S+) '
                              '\[(?P<size>\d+) b; '
                              '(?P<expires>\d+) s\]', line)
                 if m:
                     key = m.group('key')
-                    serverData[key] = dict(size=m.group('size'),
-                                           expires=m.group('expires'))
+                    sdata[key] = dict(size=m.group('size'),
+                                      expires=m.group('expires'))
         return data
 
 
