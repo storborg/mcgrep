@@ -1,8 +1,0 @@
-setup.py
-mcgrep/__init__.py
-mcgrep.egg-info/PKG-INFO
-mcgrep.egg-info/SOURCES.txt
-mcgrep.egg-info/dependency_links.txt
-mcgrep.egg-info/entry_points.txt
-mcgrep.egg-info/not-zip-safe
-mcgrep.egg-info/top_level.txt
